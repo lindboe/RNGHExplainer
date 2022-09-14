@@ -1,102 +1,77 @@
-import * as React from 'react';
-import {
-  Text,
-  Animated,
-  View,
-  StyleSheet,
-  PanResponder,
-  FlatList,
-} from 'react-native';
+import * as React from "react";
+import { Text, View, StyleSheet, Pressable } from "react-native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import PanResponderWithNestedFlatlist from "./examples/PanResponderWithNestedFlatlist";
 
-function RNHorizontalPanResponderTest({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
-  const panX = React.useRef(new Animated.Value(1)).current;
+const examples = [PanResponderWithNestedFlatlist];
 
-  const panResponder = React.useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        console.log('shouldsetpanresponder dx:', gestureState.dx);
-        const should = (gestureState.dx > 40 || gestureState.dx < -40) ? true : false;
-        console.log("should? ", should)
-        return should;
-      },
-      onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
-        console.log('shouldsetpanresponder dx:', gestureState.dx);
-        const should = (gestureState.dx > 40 || gestureState.dx < -40) ? true : false;
-        console.log("should? ", should)
-        return should;
-      },
-      onShouldBlockNativeResponder: () => true,
-      onPanResponderRelease: () => {console.log("RELEASED")},
-      onPanResponderMove: Animated.event([null, { dx: panX }], {
-        useNativeDriver: false,
-        listener: (event) => {
-          // console.log(
-          //   'event:',
-          //   event.nativeEvent.identifier,
-          //   event.nativeEvent.target,
-          //   event.nativeEvent.timestamp,
-          //   event.nativeEvent.locationX,
-          //   event.nativeEvent.pageX,
-          //   event.nativeEvent.changedTouches[0].pageX,
-          //   event.nativeEvent.touches[0].pageX
-          // )
-        },
-      }),
-    })
-  ).current;
+function componentName(component: () => React.ReactNode) {
+  return component.name || "?";
+}
 
+function displayName(camelCaseName: string) {
+  return camelCaseName.replace(/([A-Z])/g, " $1");
+}
+
+function ExampleScreenButton({ screenName }: { screenName: string }) {
+  const navigation = useNavigation();
   return (
-    <Animated.View
-      style={{
-        flex: 1,
-        height: '100%',
-        backgroundColor: 'blue',
-        opacity: panX.interpolate({
-          inputRange: [-1000, -50, 50, 1000],
-          outputRange: [0, 0, 1, 1],
-        }),
-      }}
-      {...panResponder.panHandlers}>
-      {children}
-    </Animated.View>
+    <Pressable
+      android_ripple={{ color: "#DCDCDC" }}
+      style={({ pressed }) => ({
+        backgroundColor: pressed ? "#6699cc" : "white",
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        borderWidth: 1,
+        borderRadius: 5,
+        margin: 20,
+        padding: 12,
+      })}
+      // @ts-ignore I'm too lazy to set up types for screens here
+      onPress={() => navigation.navigate(screenName)}
+    >
+      <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+        {displayName(screenName)}
+      </Text>
+    </Pressable>
   );
 }
 
-const data = [...Array(30).keys()];
-
-function ListItem({ item }: { item: number }) {
+function HomeScreen() {
   return (
-    <View
-      style={{
-        margin: 12,
-        backgroundColor: 'white',
-        padding: 12,
-        borderRadius: 5,
-      }}>
-      <Text style={{ color: 'black' }}>{item}</Text>
+    <View style={{ flex: 1, padding: 12, alignItems: "center" }}>
+      {examples.map((comp, idx) => (
+        <ExampleScreenButton key={idx} screenName={componentName(comp)} />
+      ))}
     </View>
   );
 }
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <RNHorizontalPanResponderTest>
-        <FlatList data={data} renderItem={ListItem} />
-      </RNHorizontalPanResponderTest>
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          // to fit long title names
+          headerTitleStyle: { fontSize: 14, fontWeight: "normal" },
+        }}
+      >
+        <Stack.Screen name="Home" component={HomeScreen} />
+        {examples.map((comp, idx) => (
+          <Stack.Screen key={idx} name={componentName(comp)} component={comp} />
+        ))}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
-    padding: 8,
+    justifyContent: "center",
   },
 });
