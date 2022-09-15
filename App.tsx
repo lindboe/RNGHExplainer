@@ -3,8 +3,12 @@ import { Text, View, StyleSheet, Pressable } from "react-native";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import PanResponderWithNestedFlatlist from "./examples/PanResponderWithNestedFlatlist";
+import FlatlistWithNestedPanResponder from "./examples/FlatlistWithNestedPanResponder";
 
-const examples = [PanResponderWithNestedFlatlist];
+const examples = [
+  PanResponderWithNestedFlatlist,
+  FlatlistWithNestedPanResponder,
+];
 
 function componentName(component: () => React.ReactNode) {
   return component.name || "?";
