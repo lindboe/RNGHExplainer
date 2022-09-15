@@ -20,6 +20,7 @@ function List() {
 
 const LOWEST_SHEET_POINT = 60;
 const SHEET_HEIGHT = 400;
+const MAX_SHEET_TRAVEL_DIST = SHEET_HEIGHT - LOWEST_SHEET_POINT;
 
 function Sheet({ screenHeight }: { screenHeight: null | number }) {
   const panY = React.useRef(new Animated.Value(0)).current;
@@ -40,17 +41,8 @@ function Sheet({ screenHeight }: { screenHeight: null | number }) {
       // causes crashes for me
       // https://reactnative.dev/docs/0.68/panresponder
       // https://stackoverflow.com/questions/42014379/panresponder-snaps-animated-view-back-to-original-position-on-second-drag
+      // panY.setOffset(panY._value);
       onPanResponderGrant: (event, gestureState) => {
-        // panY.setOffset(panY._value);
-        // prettier-ignore
-
-        // This doesn't work because dist is always 0 when initializing; could
-        // delay until we have a value?
-        // console.log("Y0: ", gestureState.y0);
-        // console.log(dist - gestureState.y0);
-        // panY.setOffset(dist - gestureState.y0);
-
-        console.log("animated value: ", panY._value);
         panY.setOffset(offset);
       },
       onPanResponderMove: Animated.event([null, { dy: panY }], {
@@ -65,9 +57,17 @@ function Sheet({ screenHeight }: { screenHeight: null | number }) {
       }),
       onPanResponderRelease: (event, gestureState) => {
         console.log("PanResponder Released");
-        console.log("OFFSET BEFORE: ", offset);
-        offset = offset + gestureState.dy;
-        console.log("OFFSET AFTER: ", offset);
+        // Since gestureState.dy just tracks the touch movement, offset could
+        // become larger than the maximum movement for the sheet. Check if so
+        // and use maximum offset in that case.
+        const newPotentialOffset = offset + gestureState.dy;
+        if (newPotentialOffset > MAX_SHEET_TRAVEL_DIST) {
+          offset = MAX_SHEET_TRAVEL_DIST;
+        } else if (newPotentialOffset < -MAX_SHEET_TRAVEL_DIST) {
+          offset = -MAX_SHEET_TRAVEL_DIST;
+        } else {
+          offset = offset + gestureState.dy;
+        }
       },
     })
   ).current;
@@ -89,7 +89,17 @@ function Sheet({ screenHeight }: { screenHeight: null | number }) {
           maxHeight: SHEET_HEIGHT,
           flex: 0,
         },
-        { transform: [{ translateY: panY }] },
+        {
+          transform: [
+            {
+              translateY: panY.interpolate({
+                inputRange: [-MAX_SHEET_TRAVEL_DIST, 0, MAX_SHEET_TRAVEL_DIST],
+                outputRange: [-MAX_SHEET_TRAVEL_DIST, 0, MAX_SHEET_TRAVEL_DIST],
+                extrapolate: "clamp",
+              }),
+            },
+          ],
+        },
       ]}
       {...panResponder.panHandlers}
     >
