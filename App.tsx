@@ -4,10 +4,12 @@ import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import PanResponderWithNestedFlatlist from "./examples/PanResponderWithNestedFlatlist";
 import FlatlistWithNestedPanResponder from "./examples/FlatlistWithNestedPanResponder";
+import SameDirectionNestedRN from "./examples/SameDirectionNestedRN";
 
 const examples = [
   PanResponderWithNestedFlatlist,
   FlatlistWithNestedPanResponder,
+  SameDirectionNestedRN,
 ];
 
 function componentName(component: () => React.ReactNode) {
@@ -15,7 +17,7 @@ function componentName(component: () => React.ReactNode) {
 }
 
 function displayName(camelCaseName: string) {
-  return camelCaseName.replace(/([A-Z])/g, " $1");
+  return camelCaseName.replace(/([a-z])([A-Z])/g, "$1 $2");
 }
 
 function ExampleScreenButton({ screenName }: { screenName: string }) {
