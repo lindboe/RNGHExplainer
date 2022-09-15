@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Text,
   Animated,
@@ -6,7 +6,7 @@ import {
   StyleSheet,
   PanResponder,
   FlatList,
-} from 'react-native';
+} from "react-native";
 
 function RNHorizontalPanResponderTest({
   children,
@@ -18,19 +18,23 @@ function RNHorizontalPanResponderTest({
   const panResponder = React.useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
-        console.log('shouldsetpanresponder dx:', gestureState.dx);
-        const should = (gestureState.dx > 40 || gestureState.dx < -40) ? true : false;
-        console.log("should? ", should)
+        console.log("shouldsetpanresponder dx:", gestureState.dx);
+        const should =
+          gestureState.dx > 40 || gestureState.dx < -40 ? true : false;
+        console.log("should? ", should);
         return should;
       },
       onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
-        console.log('shouldsetpanresponder dx:', gestureState.dx);
-        const should = (gestureState.dx > 40 || gestureState.dx < -40) ? true : false;
-        console.log("should? ", should)
+        console.log("shouldsetpanresponder dx:", gestureState.dx);
+        const should =
+          gestureState.dx > 40 || gestureState.dx < -40 ? true : false;
+        console.log("should? ", should);
         return should;
       },
       onShouldBlockNativeResponder: () => true,
-      onPanResponderRelease: () => {console.log("RELEASED")},
+      onPanResponderRelease: () => {
+        console.log("RELEASED");
+      },
       onPanResponderMove: Animated.event([null, { dx: panX }], {
         useNativeDriver: false,
         listener: (event) => {
@@ -53,14 +57,15 @@ function RNHorizontalPanResponderTest({
     <Animated.View
       style={{
         flex: 1,
-        height: '100%',
-        backgroundColor: 'blue',
+        height: "100%",
+        backgroundColor: "blue",
         opacity: panX.interpolate({
           inputRange: [-1000, -50, 50, 1000],
           outputRange: [0, 0, 1, 1],
         }),
       }}
-      {...panResponder.panHandlers}>
+      {...panResponder.panHandlers}
+    >
       {children}
     </Animated.View>
   );
@@ -73,18 +78,19 @@ function ListItem({ item }: { item: number }) {
     <View
       style={{
         margin: 12,
-        backgroundColor: 'white',
+        backgroundColor: "white",
         padding: 12,
         borderRadius: 5,
-      }}>
-      <Text style={{ color: 'black' }}>{item}</Text>
+      }}
+    >
+      <Text style={{ color: "black" }}>{item}</Text>
     </View>
   );
 }
 
 export default function PanResponderWithNestedFlatlist() {
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       <RNHorizontalPanResponderTest>
         <FlatList data={data} renderItem={ListItem} />
       </RNHorizontalPanResponderTest>
