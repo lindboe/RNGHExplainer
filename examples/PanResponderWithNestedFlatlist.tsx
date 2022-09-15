@@ -1,12 +1,16 @@
 import React from "react";
-import {
-  Text,
-  Animated,
-  View,
-  StyleSheet,
-  PanResponder,
-  FlatList,
-} from "react-native";
+import { Text, Animated, View, PanResponder, FlatList } from "react-native";
+
+const MINIMUM_DISTANCE_FOR_HORIZONTAL_PAN = 40;
+
+function horizontalPanShouldActivate(dx: number) {
+  return dx > MINIMUM_DISTANCE_FOR_HORIZONTAL_PAN ||
+    dx < -MINIMUM_DISTANCE_FOR_HORIZONTAL_PAN
+    ? true
+    : false;
+}
+
+// Works, but horizontal panning doesn't activate super reliably, have to gesture pretty carefully
 
 function RNHorizontalPanResponderTest({
   children,
@@ -19,18 +23,15 @@ function RNHorizontalPanResponderTest({
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
         console.log("shouldsetpanresponder dx:", gestureState.dx);
-        const should =
-          gestureState.dx > 40 || gestureState.dx < -40 ? true : false;
-        console.log("should? ", should);
-        return should;
+        return horizontalPanShouldActivate(gestureState.dx);
       },
-      onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
-        console.log("shouldsetpanresponder dx:", gestureState.dx);
-        const should =
-          gestureState.dx > 40 || gestureState.dx < -40 ? true : false;
-        console.log("should? ", should);
-        return should;
-      },
+      // can also use *Capture, doesn't matter here
+      // onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
+      //   console.log("shouldsetpanrespondercapture dx:", gestureState.dx);
+      //   return horizontalPanShouldActivate(gestureState.dx);
+      // },
+
+      // only supported on Android
       onShouldBlockNativeResponder: () => true,
       onPanResponderRelease: () => {
         console.log("RELEASED");
