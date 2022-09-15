@@ -17,9 +17,29 @@ function ListItem({ item }: { item: number }) {
     </View>
   );
 }
-function List() {
+function List({
+  scrollAtTop,
+}: {
+  scrollAtTop: React.MutableRefObject<boolean>;
+}) {
+  // Because onScroll fires on first load. For some reason.
+  const initializationRef = React.useRef(0);
   return (
     <FlatList
+      onScroll={(event) => {
+        if (initializationRef.current === 0) {
+          initializationRef.current = 1;
+          return;
+        }
+        const { y } = event.nativeEvent.contentOffset;
+        console.log("Scroll Y", y);
+        if (y === 0) {
+          console.log("setting returned to top true");
+          scrollAtTop.current = true;
+        } else {
+          scrollAtTop.current = false;
+        }
+      }}
       style={{
         marginVertical: LIST_MARGIN,
         backgroundColor: "blue",
@@ -44,6 +64,8 @@ function Sheet({ screenHeight }: { screenHeight: null | number }) {
   let topMarginBottomCoordinate = React.useRef(0).current;
   let bottomMarginTopCoordinate = React.useRef(0).current;
   let bottomMarginBottomCoordinate = React.useRef(0).current;
+  let scrollAtTop = React.useRef(true).current;
+  let scrollReturnedToTop = React.useRef(false);
 
   React.useEffect(() => {
     panY.addListener(({ value }) => console.log("value: ", value));
@@ -105,6 +127,22 @@ function Sheet({ screenHeight }: { screenHeight: null | number }) {
         // pre-screen height knowledge?
 
         // C. Can pan down again when scrollView is at top
+        // if (scrollAtTop === true) {
+        //   return true;
+        // } else {
+        //   return false;
+        // }
+        // Doesn't work because we can never scroll down!
+
+        // D. Can pan down again after scrolling once and then returning scrollView to top
+        console.log("SCROLL RETURNED? ", scrollReturnedToTop.current);
+        if (scrollReturnedToTop.current) {
+          return true;
+        } else if (offset === -MAX_SHEET_TRAVEL_DIST) {
+          return false;
+        } else {
+          return true;
+        }
 
         // Z. Always -- not going to work with nested gesture handlers
         // return true;
@@ -176,7 +214,7 @@ function Sheet({ screenHeight }: { screenHeight: null | number }) {
       ]}
       {...panResponder.panHandlers}
     >
-      <List />
+      <List scrollAtTop={scrollReturnedToTop} />
     </Animated.View>
   );
 }
