@@ -74,11 +74,13 @@ function RNHorizontalPanResponderTest({
 
 function ListItem({ item }: { item: { color: string } }) {
   return (
-    <RNHorizontalPanResponderTest>
-      <View
-        style={{ flex: 1, backgroundColor: item.color, height: 200 }}
-      ></View>
-    </RNHorizontalPanResponderTest>
+    <View style={{ margin: 20 }}>
+      <RNHorizontalPanResponderTest>
+        <View
+          style={{ flex: 1, backgroundColor: item.color, height: 200 }}
+        ></View>
+      </RNHorizontalPanResponderTest>
+    </View>
   );
 }
 
